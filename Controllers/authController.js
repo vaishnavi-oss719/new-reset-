@@ -77,8 +77,9 @@ export const forgotPassword = async (req, res) => {
       pass: process.env.EMAIL_PASS,
     },
     tls: {
-      rejectUnauthorized: false   // <-- ADD THIS
-    }
+    ciphers: "SSLv3",
+    rejectUnauthorized: false,
+  },
   });
 
   const resetURL = `${process.env.CLIENT_URL}/reset/${resetToken}`;
