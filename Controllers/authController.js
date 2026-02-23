@@ -2,7 +2,7 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
-import nodemailer from "nodemailer";
+import axios from "axios";
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
@@ -84,12 +84,31 @@ export const forgotPassword = async (req, res) => {
 
   const resetURL = `${process.env.CLIENT_URL}/reset/${resetToken}`;
 
-  await transporter.sendMail({
-    to: user.email,
+  await axios.post(
+  "https://api.brevo.com/v3/smtp/email",
+  {
+    sender: {
+      name: "Reset Support",
+      email: "your_verified_email@gmail.com",
+    },
+    to: [
+      {
+        email: user.email,
+      },
+    ],
     subject: "Password Reset",
-    html: `<h3>Click below to reset password</h3>
-           <a href="${resetURL}">${resetURL}</a>`,
-  });
+    htmlContent: `
+      <h3>Click below to reset password</h3>
+      <a href="${resetURL}">${resetURL}</a>
+    `,
+  },
+  {
+    headers: {
+      "api-key": process.env.BREVO_API_KEY,
+      "Content-Type": "application/json",
+    },
+  }
+);
 
   res.json({ message: "Reset link sent to email" });
 };
