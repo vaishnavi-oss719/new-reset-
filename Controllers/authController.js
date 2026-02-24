@@ -200,10 +200,10 @@ export const forgotPassword = async (req, res) => {
     const resetToken = crypto.randomBytes(32).toString("hex");
 
     user.resetToken = resetToken;
-    user.resetTokenExpire = Date.now() + 10 * 60 * 1000; // 10 mins
+    user.resetTokenExpire = Date.now() + 60 * 60 * 1000; // 1hr
     await user.save();
 
- const resetURL = `https://new-reset-1.onrender.com/api/auth/reset/${resetToken}`;
+ const resetURL = `http://localhost:5173/reset/${resetToken}`;
 
     // 🔥 Send Email using Brevo
     await axios.post(
@@ -233,6 +233,32 @@ export const forgotPassword = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Email sending failed" });
+  }
+};
+
+
+
+// update email
+
+export const updateEmail = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const { email } = req.body;
+
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already in use" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    user.email = email;
+    await user.save();
+
+    res.json({ message: "Email updated successfully", email: user.email });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 
