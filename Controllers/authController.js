@@ -214,6 +214,7 @@ export const forgotPassword = async (req, res) => {
           email: "rv172542@gmail.com", // verify in Brevo
         },
         to: [{ email: user.email }],
+        
         subject: "Password Reset",
         htmlContent: `
           <h3>Password Reset Request</h3>
