@@ -141,7 +141,7 @@ import axios from "axios";
 // ================= REGISTER =================
 export const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { name, email, password } = req.body;
 
     const userExists = await User.findOne({ email });
     if (userExists) {
@@ -151,7 +151,7 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await User.create({
-      username,
+      name,
       email,
       password: hashedPassword,
     });
@@ -203,7 +203,7 @@ export const forgotPassword = async (req, res) => {
     user.resetTokenExpire = Date.now() + 60 * 60 * 1000; // 1hr
     await user.save();
 
- const resetURL = `http://localhost:5173/reset/${resetToken}`;
+ const resetURL = `${process.env.CLIENT_URL}/reset/${resetToken}`;
 
     // 🔥 Send Email using Brevo
     await axios.post(
@@ -214,7 +214,7 @@ export const forgotPassword = async (req, res) => {
           email: "rv172542@gmail.com", // verify in Brevo
         },
         to: [{ email: user.email }],
-        
+
         subject: "Password Reset",
         htmlContent: `
           <h3>Password Reset Request</h3>
